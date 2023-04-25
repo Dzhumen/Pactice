@@ -1,0 +1,56 @@
+#include <iostream>
+#include <string>
+#include <map>
+
+using namespace std;
+
+int main() {
+    string message;
+    cout << "Enter a message to encode: ";
+    getline(cin, message);
+    
+    map<char, int> frequencies;
+    for (char c : message) {
+        frequencies[c]++;
+    }
+    
+    double total = message.size();
+    map<char, pair<double, double>> ranges;
+    double low = 0.0, high = 0.0;
+    for (auto& [key, value] : frequencies) {
+        double freq = value / total;
+        high = low + freq;
+        ranges[key] = make_pair(low, high);
+        low = high;
+    }
+    
+    string encoded = "";
+    low = 0.0, high = 1.0;
+    double range = 1.0;
+    for (char c : message) {
+        range = high - low;
+        high = low + range * ranges[c].second;
+        low = low + range * ranges[c].first;
+        while (true) {
+            if (high < 0.5) {
+                encoded += '0';
+                high *= 2;
+                low *= 2;
+            } else if (low > 0.5) {
+                encoded += '1';
+                high = 2 * (high - 0.5);
+                low = 2 * (low - 0.5);
+            } else {
+                break;
+            }
+        }
+    }
+    cout << "Encoded message: " << encoded << endl;
+    
+    cout << "Ranges: " << endl;
+    for (auto& [key, value] : ranges) {
+        cout << "'" << key << "': [" << value.first << ", " << value.second << "]" << endl;
+    }
+
+    return 0;
+} 
